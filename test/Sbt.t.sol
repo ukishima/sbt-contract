@@ -17,36 +17,55 @@ contract SbtTest is Test {
         sbt = new Sbt();
         imp = new SbtImp();
 
+        sbt.init(owner, "Wagumi SBT", "SBT", "example://", validator);
+
         bytes4[] memory sigs = new bytes4[](3);
         address[] memory impAddress = new address[](3);
-        sigs[0] = bytes4(0x731133e9);
+        sigs[0] = bytes4(keccak256("mint(address,uint256,uint256,bytes)"));
+        sigs[1] = bytes4(keccak256("setValidator(address)"));
+        sigs[2] = bytes4(keccak256("getValidator()"));
         impAddress[0] = address(imp);
-        vm.prank(address(0));
+        impAddress[1] = address(imp);
+        impAddress[2] = address(imp);
+        vm.prank(owner);
         sbt.setImplementation(sigs, impAddress);
+
+        address(sbt).call(
+            abi.encodeWithSignature("setValidator(address)", validator)
+        );
     }
 
     function testInit() public {
-        sbt.init(owner, "Wagumi SBT", "SBT", "example://", validator);
         assertEq(sbt.name(), "Wagumi SBT");
         assertEq(sbt.symbol(), "SBT");
     }
 
+    function testGetValidator() public {
+        (, bytes memory result) = address(sbt).call(
+            abi.encodeWithSignature("getValidator()")
+        );
+        address addr;
+        assembly {
+            addr := mload(add(add(result, 32), 0))
+        }
+        assertEq(addr, validator);
+    }
+
     function testMint() public {
         bytes32 _messagehash = keccak256(
-            abi.encode(msg.sender, address(0xBEEF), uint256(0), uint256(0))
+            abi.encode(validator, address(0xBEEF), uint256(0), uint256(0))
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, _messagehash);
-        console.log(v);
+        vm.prank(validator);
         address(sbt).call(
             abi.encodeWithSignature(
-                "mint(address,uint256,uin256,bytes)",
+                "mint(address,uint256,uint256,bytes)",
                 address(0xBEEF),
-                uint256(0)
+                uint256(0),
+                uint256(0),
+                abi.encodePacked(r, s, v)
             )
         );
-        // sbt.mint(address(0xBEEF), 1337);
-
-        // assertEq(sbt.balanceOf(address(0xBEEF)), 1);
-        // assertEq(sbt.ownerOf(1337), address(0xBEEF));
+        assertEq(sbt.balanceOf(address(0xBEEF)), 1);
     }
 }

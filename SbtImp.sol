@@ -25,6 +25,9 @@ contract SbtImp {
         require(verify(_messagehash, _signature), "INVALID");
         SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
         sbtstruct.owners[_tokenId] = _address;
+        unchecked {
+            sbtstruct.balances[_address]++;
+        }
         emit Transfer(address(0), _address, _tokenId);
     }
 
