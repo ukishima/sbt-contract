@@ -9,7 +9,7 @@ contract Sbt {
         string calldata _name,
         string calldata _symbol,
         string calldata _baseURI,
-        address _validator
+        bytes32 _validator
     ) external {
         SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
         require(sbtstruct.contractOwner == address(0), "INITIATED ALREADY");

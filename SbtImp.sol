@@ -10,7 +10,7 @@ contract SbtImp {
         uint256 indexed _tokenId
     );
     event ContractOwnerChanged(address _newOwner);
-    event ValidatorChanged(address _newValidator);
+    event ValidatorChanged(bytes32 _newValidator);
 
     // 0x731133e9
     function mint(
@@ -38,14 +38,14 @@ contract SbtImp {
         emit ContractOwnerChanged(_newContactOwner);
     }
 
-    function setValidator(address _newValidator) external {
+    function setValidator(bytes32 _newValidator) external {
         SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
         require(msg.sender == sbtstruct.contractOwner, "OWNER ONLY");
         sbtstruct.validator = _newValidator;
         emit ValidatorChanged(_newValidator);
     }
 
-    function getValidator() external view returns (address) {
+    function getValidator() external view returns (bytes32) {
         SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
         return sbtstruct.validator;
     }
@@ -65,6 +65,8 @@ contract SbtImp {
             _s := mload(add(_signature, 64))
             _v := byte(0, mload(add(_signature, 96)))
         }
-        return ecrecover(_hash, _v, _r, _s) == sbtstruct.validator;
+        return
+            keccak256(abi.encodePacked(ecrecover(_hash, _v, _r, _s))) ==
+            sbtstruct.validator;
     }
 }

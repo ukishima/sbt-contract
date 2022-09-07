@@ -9,7 +9,7 @@ library SbtLib {
         string name;
         string symbol;
         string baseURI;
-        address validator;
+        bytes32 validator;
         mapping(bytes4 => bool) interfaces;
         mapping(address => uint256) balances;
         mapping(uint256 => address) owners;

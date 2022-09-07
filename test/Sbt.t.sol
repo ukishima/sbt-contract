@@ -18,12 +18,18 @@ contract SbtTest is Test {
         sbt = new Sbt();
         imp = new SbtImp();
 
-        sbt.init(owner, "Wagumi SBT", "SBT", "example://", validator);
+        sbt.init(
+            owner,
+            "Wagumi SBT",
+            "SBT",
+            "example://",
+            keccak256(abi.encodePacked(validator))
+        );
 
         bytes4[] memory sigs = new bytes4[](4);
         address[] memory impAddress = new address[](4);
         sigs[0] = bytes4(keccak256("mint(address,uint256,uint256,bytes)"));
-        sigs[1] = bytes4(keccak256("setValidator(address)"));
+        sigs[1] = bytes4(keccak256("setValidator(bytes32)"));
         sigs[2] = bytes4(keccak256("getValidator()"));
         sigs[3] = bytes4(keccak256("setContractOwner(address)"));
         impAddress[0] = address(imp);
@@ -53,11 +59,7 @@ contract SbtTest is Test {
         (, bytes memory result) = address(sbt).call(
             abi.encodeWithSignature("getValidator()")
         );
-        address addr;
-        assembly {
-            addr := mload(add(add(result, 32), 0))
-        }
-        assertEq(addr, validator);
+        assertEq(keccak256(abi.encodePacked(validator)), bytes32(result));
     }
 
     function testMint() public {
