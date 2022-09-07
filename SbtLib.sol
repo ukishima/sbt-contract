@@ -2,7 +2,7 @@
 pragma solidity ^0.8.16;
 
 library SbtLib {
-    bytes32 constant SBT_STRUCT_POSITION = keccak256("xyz.ukishima.sbt.struct");
+    bytes32 constant SBT_STRUCT_POSITION = keccak256("xyz.wagumi.sbt");
 
     struct SbtStruct {
         address contractOwner;
