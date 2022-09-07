@@ -31,16 +31,9 @@ contract SbtImp {
         emit Transfer(address(0), _address, _tokenId);
     }
 
-    function setContractOwner(
-        address _newContactOwner,
-        uint256 _salt,
-        bytes memory _signature
-    ) external {
-        bytes32 _messagehash = keccak256(
-            abi.encode(msg.sender, _newContactOwner, _salt)
-        );
-        require(verify(_messagehash, _signature), "INVALID");
+    function setContractOwner(address _newContactOwner) external {
         SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
+        require(msg.sender == sbtstruct.contractOwner, "OWNER ONLY");
         sbtstruct.contractOwner = _newContactOwner;
         emit ContractOwnerChanged(_newContactOwner);
     }

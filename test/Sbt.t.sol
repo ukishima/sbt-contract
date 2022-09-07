@@ -19,14 +19,16 @@ contract SbtTest is Test {
 
         sbt.init(owner, "Wagumi SBT", "SBT", "example://", validator);
 
-        bytes4[] memory sigs = new bytes4[](3);
-        address[] memory impAddress = new address[](3);
+        bytes4[] memory sigs = new bytes4[](4);
+        address[] memory impAddress = new address[](4);
         sigs[0] = bytes4(keccak256("mint(address,uint256,uint256,bytes)"));
         sigs[1] = bytes4(keccak256("setValidator(address)"));
         sigs[2] = bytes4(keccak256("getValidator()"));
+        sigs[3] = bytes4(keccak256("setContractOwner(address)"));
         impAddress[0] = address(imp);
         impAddress[1] = address(imp);
         impAddress[2] = address(imp);
+        impAddress[3] = address(imp);
         vm.prank(owner);
         sbt.setImplementation(sigs, impAddress);
 
@@ -38,6 +40,12 @@ contract SbtTest is Test {
     function testInit() public {
         assertEq(sbt.name(), "Wagumi SBT");
         assertEq(sbt.symbol(), "SBT");
+        assertEq(sbt.contractOwner(), owner);
+    }
+
+    function testSupportsInterface() public {
+        assertEq(sbt.supportsInterface(0x01ffc9a7), true);
+        assertEq(sbt.supportsInterface(0x5b5e139f), true);
     }
 
     function testGetValidator() public {
@@ -67,5 +75,31 @@ contract SbtTest is Test {
             )
         );
         assertEq(sbt.balanceOf(address(0xBEEF)), 1);
+        assertEq(sbt.tokenURI(0), "example://0.json");
+
+        vm.expectRevert(bytes("INVALID"));
+        address(sbt).call(
+            abi.encodeWithSignature(
+                "mint(address,uint256,uint256,bytes)",
+                address(0xBEEF),
+                uint256(999),
+                uint256(999),
+                abi.encodePacked(r, s, v)
+            )
+        );
+    }
+
+    function testSetContractOwner() public {
+        address newOwner = address(3);
+        vm.prank(owner);
+        (, bytes memory result) = address(sbt).call(
+            abi.encodeWithSignature("setContractOwner(address)", newOwner)
+        );
+        assertEq(sbt.contractOwner(), newOwner);
+
+        vm.expectRevert(bytes("OWNER ONLY"));
+        address(sbt).call(
+            abi.encodeWithSignature("setContractOwner(address)", newOwner)
+        );
     }
 }
