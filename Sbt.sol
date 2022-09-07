@@ -76,11 +76,6 @@ contract Sbt {
         return sbtstruct.owners[_tokenId];
     }
 
-    function balanceOf(address _owner) external view returns (uint256) {
-        SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
-        return sbtstruct.balances[_owner];
-    }
-
     function toString(uint256 value) internal pure returns (string memory) {
         if (value == 0) {
             return "0";

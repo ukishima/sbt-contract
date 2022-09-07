@@ -77,7 +77,6 @@ contract SbtTest is Test {
                 abi.encodePacked(r, s, v)
             )
         );
-        assertEq(sbt.balanceOf(address(0xBEEF)), 1);
         assertEq(sbt.tokenURI(0), "example://0.json");
 
         vm.expectRevert(bytes("INVALID"));
