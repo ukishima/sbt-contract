@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.16;
 
-library  SbtLib {
-    bytes32 constant SBT_STRUCT_POSITION = keccak256("xyz.ukishima.sbt.struct");
+library SbtLib {
+    bytes32 constant SBT_STRUCT_POSITION = keccak256("xyz.wagumi.sbt");
 
     struct SbtStruct {
         address contractOwner;
@@ -23,16 +23,10 @@ library  SbtLib {
         uint256 tokenId;
     }
 
-  function sbtStorage()
-    internal 
-    pure 
-    returns (SbtStruct storage sbtstruct) 
-  {
-    bytes32 position = SBT_STRUCT_POSITION;
-    assembly {
-      sbtstruct.slot := position
+    function sbtStorage() internal pure returns (SbtStruct storage sbtstruct) {
+        bytes32 position = SBT_STRUCT_POSITION;
+        assembly {
+            sbtstruct.slot := position
+        }
     }
-  }
-
-
 }

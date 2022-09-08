@@ -3,13 +3,18 @@ pragma solidity ^0.8.16;
 
 import "./SbtLib.sol";
 
-contract Sbt{
-
-    function init(address _contractOwner, string calldata _name, string calldata _symbol, string calldata _baseURI, bytes32 _validator) external {
+contract Sbt {
+    function init(
+        address _contractOwner,
+        string calldata _name,
+        string calldata _symbol,
+        string calldata _baseURI,
+        bytes32 _validator
+    ) external {
         SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
-        require(sbtstruct.contractOwner == address(0),"INITED ALREADY");
+        require(sbtstruct.contractOwner == address(0), "INITIATED ALREADY");
         sbtstruct.contractOwner = _contractOwner;
-        sbtstruct.name = _name;          
+        sbtstruct.name = _name;
         sbtstruct.symbol = _symbol;
         sbtstruct.baseURI = _baseURI;
         sbtstruct.validator = _validator;
@@ -19,45 +24,55 @@ contract Sbt{
 
     mapping(bytes4 => address) public implementations;
 
-    function setImplementation(bytes4[] calldata _sigs, address[] calldata _impAddress) external {
-        SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage(); 
-        require(msg.sender == sbtstruct.contractOwner,"OWNER ONLY");
-        require(_sigs.length == _impAddress.length,"INVAILED LENGTH");
-        for(uint256 i = 0;i < _sigs.length;i++){
-            unchecked{
+    function setImplementation(
+        bytes4[] calldata _sigs,
+        address[] calldata _impAddress
+    ) external {
+        SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
+        require(msg.sender == sbtstruct.contractOwner, "OWNER ONLY");
+        require(_sigs.length == _impAddress.length, "INVALID LENGTH");
+        for (uint256 i = 0; i < _sigs.length; i++) {
+            unchecked {
                 implementations[_sigs[i]] = _impAddress[i];
             }
-        } 
+        }
     }
 
-    function contractOwner() external view returns(address){
-        SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();        
+    function contractOwner() external view returns (address) {
+        SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
         return sbtstruct.contractOwner;
     }
 
-    function supportsInterface(bytes4 _interfaceID) external view returns (bool){
-        SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();        
+    function supportsInterface(bytes4 _interfaceID)
+        external
+        view
+        returns (bool)
+    {
+        SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
         return sbtstruct.interfaces[_interfaceID];
     }
 
-   function name() external view returns (string memory){
-        SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();        
+    function name() external view returns (string memory) {
+        SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
         return sbtstruct.name;
     }
 
     //0x95d89b41
-    function symbol() external view returns (string memory){
-        SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();        
+    function symbol() external view returns (string memory) {
+        SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
         return sbtstruct.symbol;
     }
 
-    function tokenURI(uint256 _tokenId) external view returns(string memory){
+    function tokenURI(uint256 _tokenId) external view returns (string memory) {
         SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
-        return string(abi.encodePacked(sbtstruct.baseURI,toString(_tokenId),".json"));
+        return
+            string(
+                abi.encodePacked(sbtstruct.baseURI, toString(_tokenId), ".json")
+            );
     }
 
-    function ownerOf(uint256 _tokenId) external view returns(address){
-        SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();        
+    function ownerOf(uint256 _tokenId) external view returns (address) {
+        SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
         return sbtstruct.owners[_tokenId];
     }
 
@@ -68,15 +83,14 @@ contract Sbt{
         uint256 temp = value;
         uint256 digits;
         while (temp != 0) {
-            unchecked{
+            unchecked {
                 digits++;
                 temp /= 10;
             }
-
         }
         bytes memory buffer = new bytes(digits);
         while (value != 0) {
-            unchecked{
+            unchecked {
                 digits -= 1;
                 buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
                 value /= 10;
@@ -84,7 +98,6 @@ contract Sbt{
         }
         return string(buffer);
     }
-
 
     fallback() external payable {
         address _imp = implementations[msg.sig];
@@ -94,14 +107,14 @@ contract Sbt{
             let result := delegatecall(gas(), _imp, 0, calldatasize(), 0, 0)
             returndatacopy(0, 0, returndatasize())
             switch result
-                case 0 {
-                    revert(0, returndatasize())
-                }
-                default {
-                    return(0, returndatasize())
-                }
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
         }
     }
 
-    receive() external payable {}    
+    receive() external payable {}
 }
