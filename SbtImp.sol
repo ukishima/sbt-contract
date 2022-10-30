@@ -24,6 +24,7 @@ contract SbtImp {
         );
         require(verify(_messagehash, _signature), "INVALID");
         SbtLib.SbtStruct storage sbtstruct = SbtLib.sbtStorage();
+        require(sbtstruct.owners[_tokenId] == address(0) ,"MINTED ALREADY");
         sbtstruct.owners[_tokenId] = _address;
         unchecked {
             sbtstruct.balances[_address]++;
